@@ -7,7 +7,7 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("developerId");
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -32,7 +32,7 @@ const loginUser = async (req, res) => {
         name: user.name,
         role: user.role,
         email: user.email,
-        companyName: user.companyName || "",
+        companyName: user.role == "Assistant" ? user.developerId?.companyName : user.companyName || "",
       },
     });
   } catch (error) {
