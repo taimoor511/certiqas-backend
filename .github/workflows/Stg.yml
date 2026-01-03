@@ -10,7 +10,7 @@ jobs:
     runs-on: [self-hosted,certiqas-backend-vm]
 
     env:
-      PM2_PROCESS_NAME: certiqas-backend
+      PM2_PROCESS_NAME: certiqas-backend-Stg
       node-version: 22
 
     steps:
