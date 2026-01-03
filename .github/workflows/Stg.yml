@@ -3,7 +3,7 @@ name: Deploying stg Branch
 on:
   push:
     branches:
-      - stg
+      - Stg
 
 jobs:
   build:
