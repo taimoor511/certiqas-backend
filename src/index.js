@@ -14,12 +14,12 @@ connectDB();
 app.use("/api/admin", adminRoutes);
 app.use("/api/properties", propertyRoutes );
 app.use("/api/broker", brokerRoutes);
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
-});
-// app.listen("8000", () => {
-//   console.log(`Server running on port 8000`);
+// const PORT = process.env.PORT || 8080;
+// app.listen(PORT, "0.0.0.0", () => {
+//   console.log(`Server running on port ${PORT}`);
 // });
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
+});
 
 
