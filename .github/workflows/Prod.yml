@@ -1,31 +1,33 @@
-name: Deploying stg Branch
+name: Deploying Prod Branch
 
 on:
   push:
     branches:
-      - Stg
-
+      - Prod
 jobs:
-  build:
-    runs-on: [self-hosted,certiqas-backend-vm]
+  deploy:
+
+    runs-on: [self-hosted, certiqas-backend-vm]
 
     env:
-      PM2_PROCESS_NAME: certiqas-backend-Stg
-      node-version: 22
+      PM2_PROCESS_NAME: certiqas-backend-Prod
+      NODE_VERSION: 22
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          clean: false
+          clean: False
+          path: Prod-Branch
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.node-version }}
+          node-version:  ${{ env.node-version }}
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+        working-directory: Prod-Branch
 
       - name: Start or Reload the Application
         run: |
@@ -36,4 +38,4 @@ jobs:
             echo "Process $PM2_PROCESS_NAME does not exist. Starting..."
             pm2 start "npm start" --name "$PM2_PROCESS_NAME"
           fi
-          pm2 save
+        working-directory: Prod-Branch
