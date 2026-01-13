@@ -323,9 +323,90 @@ const getPropertyById = async (req, res) => {
     });
   }
 };
+
+const fetchApprovedPropertiesByPublic = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      propertyId,
+      developerName,
+      projectName,
+    } = req.query;
+
+    // ✅ Build filter object
+    const filter = {
+      mintingStatus: "approved",
+    };
+
+    if (propertyId) {
+      filter.propertyId = { $regex: propertyId, $options: "i" };
+    }
+
+    if (developerName) {
+      filter.developerName = { $regex: developerName, $options: "i" };
+    }
+
+    if (projectName) {
+      filter.projectName = { $regex: projectName, $options: "i" };
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // ✅ Fetch data + count
+    const [properties, total] = await Promise.all([
+      Properties.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      Properties.countDocuments(filter),
+    ]);
+
+    return {
+      data: properties,
+      pagination: {
+        totalRecords: total,
+        currentPage: Number(page),
+        totalPages: Math.ceil(total / limit),
+        limit: Number(limit),
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getApprovedPropertyDetailPublic = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const property = await fetchApprovedPropertyDetailById(id);
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found or not approved",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: property,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   createProperty,
   getAllProperties,
   getPropertyById,
   mintPendingProperty,
+  fetchApprovedPropertiesByPublic,
+  getApprovedPropertyDetailPublic
 };
