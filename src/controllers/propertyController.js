@@ -333,8 +333,6 @@ const fetchApprovedPropertiesByPublic = async (req, res) => {
       developerName,
       projectName,
     } = req.query;
-
-    // ✅ Build filter object
     const filter = {
       mintingStatus: "approved",
     };
@@ -352,27 +350,23 @@ const fetchApprovedPropertiesByPublic = async (req, res) => {
     }
 
     const skip = (Number(page) - 1) * Number(limit);
-
-    // ✅ Fetch data + count
-    const [properties, total] = await Promise.all([
-      Properties.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit)),
-      Properties.countDocuments(filter),
-    ]);
-
-    return {
+    const total = await Properties.countDocuments(filter);
+    const properties = await Properties.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+    return res.status(200).json({
+      success: true,
+      page: Number(page),
+      totalPages: Math.ceil(total / Number(limit)),
+      totalItems: total,
       data: properties,
-      pagination: {
-        totalRecords: total,
-        currentPage: Number(page),
-        totalPages: Math.ceil(total / limit),
-        limit: Number(limit),
-      },
-    };
+    });
   } catch (error) {
-    throw error;
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -380,7 +374,7 @@ const getApprovedPropertyDetailPublic = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const property = await fetchApprovedPropertyDetailById(id);
+    const property = await Properties.findById(id);
 
     if (!property) {
       return res.status(404).json({
@@ -401,12 +395,11 @@ const getApprovedPropertyDetailPublic = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createProperty,
   getAllProperties,
   getPropertyById,
   mintPendingProperty,
   fetchApprovedPropertiesByPublic,
-  getApprovedPropertyDetailPublic
+  getApprovedPropertyDetailPublic,
 };
